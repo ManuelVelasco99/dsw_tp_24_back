@@ -4,7 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mysql = require('mysql2/promise');
-const { Sequelize, DataTypes, Model } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const Usuario = require('./models/Usuario');
 const Establecimiento = require('./models/Establecimiento');
 const indexRouter = require('./routes/index');
@@ -46,90 +46,90 @@ app.use(function(err, req, res, next) {
 
 // create db if it doesn't already exist
 const createDb = async () =>{
-  const connection = await mysql.createConnection({ 
-    host:process.env.DB_HOST,
-    port:process.env.DB_PORT,
-    user:process.env.DB_USER,
-    password:process.env.DB_PASSWORD });
-  await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME}\`;`);
+	const connection = await mysql.createConnection({ 
+		host:process.env.DB_HOST,
+		port:process.env.DB_PORT,
+		user:process.env.DB_USER,
+		password:process.env.DB_PASSWORD });
+	await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME}\`;`);
 }
 
 
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
-  host: process.env.DB_HOST,
-  dialect: "mysql",
-  port: process.env.DB_PORT
+	host: process.env.DB_HOST,
+	dialect: "mysql",
+	port: process.env.DB_PORT
 });
 
 const sequelizeTest = async () =>{
-  try {
-    await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-  } catch (error) {
-    console.error('Unable to connect to the database:', error);
-  }
+	try {
+		await sequelize.authenticate();
+		console.log('Connection has been established successfully.');
+	} catch (error) {
+		console.error('Unable to connect to the database:', error);
+	}
 }
 
-async()=>{
+configurarConexionDb = async()=>{
+	await createDb();
+	await sequelizeTest();
 
-  await createDb();
-  await sequelizeTest();
-  
+	Usuario.init(
+		{
+			// Model attributes are defined here
+			nombre: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			apellido: {
+				type: DataTypes.STRING,
+				allowNull: false,
+				// allowNull defaults to true
+			},
+		},
+		{
+			// Other model options go here
+			sequelize, // We need to pass the connection instance
+			modelName: 'Usuario', // We need to choose the model name
+		},
+	);
+	
+	
+	Establecimiento.init(
+		{
+			// Model attributes are defined here
+			nombre: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			direccion: {
+				type: DataTypes.STRING,
+				allowNull: false,
+				// allowNull defaults to true
+			},
+			telefono: {
+				type: DataTypes.STRING,
+				allowNull: false,
+				// allowNull defaults to true
+			},
+			habilitado: {
+				type: DataTypes.BOOLEAN,
+				allowNull: false,
+				defaultValue : true,
+				// allowNull defaults to true
+			},
+		},
+		{
+			// Other model options go here
+			sequelize, // We need to pass the connection instance
+			modelName: 'Establecimiento', // We need to choose the model name
+		},
+	);
+	
+	Usuario.sync();
+	Establecimiento.sync();
 }
 
-Usuario.init(
-  {
-    // Model attributes are defined here
-    nombre: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    apellido: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      // allowNull defaults to true
-    },
-  },
-  {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'Usuario', // We need to choose the model name
-  },
-);
-
-
-Establecimiento.init(
-  {
-    // Model attributes are defined here
-    nombre: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    direccion: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      // allowNull defaults to true
-    },
-    telefono: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      // allowNull defaults to true
-    },
-    habilitado: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue : true,
-      // allowNull defaults to true
-    },
-  },
-  {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'Establecimiento', // We need to choose the model name
-  },
-);
-
-Usuario.sync();
-Establecimiento.sync();
+configurarConexionDb();
 
 module.exports = app;

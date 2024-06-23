@@ -8,9 +8,11 @@ const { Sequelize, DataTypes } = require('sequelize');
 const Usuario = require('./models/Usuario');
 const Establecimiento = require('./models/Establecimiento');
 const Especialidad = require('./models/Especialidad');
+const Profesional = require('./models/Profesional');
 const indexRouter = require('./routes/index');
 const establecimientosRouter = require('./routes/establecimientos_router');
 const especialidadesRouter = require('./routes/especialidades_router');
+const profesionalesRouter = require('./routes/profesionales_router');
 const usuariosRouter = require('./routes/usuarios_router');
 
 require('dotenv').config()
@@ -30,6 +32,7 @@ app.use('/', indexRouter);
 app.use('/usuarios', usuariosRouter);
 app.use('/establecimientos', establecimientosRouter);
 app.use('/especialidades', especialidadesRouter);
+app.use('/profesionales', profesionalesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -150,10 +153,46 @@ configurarConexionDb = async()=>{
 			tableName: 'Especialidades'
 		},
 	);
+
+	Profesional.init(
+		{
+			// Model attributes are defined here
+			nombre: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			apellido: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			id_especialidad: {
+				type: DataTypes.INTEGER,
+				allowNull: false, // No permite valores nulos
+				references: {
+				  model: Especialidad,
+				  key: 'id'
+				}
+			},
+			habilitado: {
+				type: DataTypes.BOOLEAN,
+				allowNull: false,
+				defaultValue : true,
+			},
+		},
+		{
+			// Other model options go here
+			sequelize, // We need to pass the connection instance
+			modelName: 'Profesional', // We need to choose the model name
+			tableName: 'Profesionales',
+		},
+	);
+	Profesional.belongsTo(Especialidad, { as: 'profesional_especialidad', foreignKey: 'id_especialidad'});
+
 	
 	Usuario.sync();
 	Establecimiento.sync();
 	Especialidad.sync();
+	Profesional.sync();
 }
 
 configurarConexionDb();

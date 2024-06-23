@@ -7,8 +7,10 @@ const mysql = require('mysql2/promise');
 const { Sequelize, DataTypes } = require('sequelize');
 const Usuario = require('./models/Usuario');
 const Establecimiento = require('./models/Establecimiento');
+const Especialidad = require('./models/Especialidad');
 const indexRouter = require('./routes/index');
 const establecimientosRouter = require('./routes/establecimientos_router');
+const especialidadesRouter = require('./routes/especialidades_router');
 const usuariosRouter = require('./routes/usuarios_router');
 
 require('dotenv').config()
@@ -27,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/usuarios', usuariosRouter);
 app.use('/establecimientos', establecimientosRouter);
+app.use('/especialidades', especialidadesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -125,9 +128,32 @@ configurarConexionDb = async()=>{
 			modelName: 'Establecimiento', // We need to choose the model name
 		},
 	);
+
+	Especialidad.init(
+		{
+			// Model attributes are defined here
+			nombre: {
+				type: DataTypes.STRING,
+				allowNull: false,
+			},
+			habilitado: {
+				type: DataTypes.BOOLEAN,
+				allowNull: false,
+				defaultValue : true,
+				// allowNull defaults to true
+			},
+		},
+		{
+			// Other model options go here
+			sequelize, // We need to pass the connection instance
+			modelName: 'Especialidad', // We need to choose the model name
+			tableName: 'Especialidades'
+		},
+	);
 	
 	Usuario.sync();
 	Establecimiento.sync();
+	Especialidad.sync();
 }
 
 configurarConexionDb();

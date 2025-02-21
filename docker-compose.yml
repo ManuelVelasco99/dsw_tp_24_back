@@ -1,0 +1,29 @@
+services:
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "${DB_PORT_OUT}:${DB_PORT_IN}"
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+
+  app:
+    image: node:18 # Utiliza la versión de Node deseada, por ejemplo, 18
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    ports:
+      - "${APP_PORT_OUT}:${APP_PORT_IN}"
+
+volumes:
+  db_data:
+
